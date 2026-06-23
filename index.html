@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香烟零售销售系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-store"></i> 香烟零售销售系统</h1>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="brands">品牌管理</button>
+            <button class="tab-btn" data-tab="purchases">进货管理</button>
+            <button class="tab-btn" data-tab="suppliers">供应商管理</button>
+            <button class="tab-btn" data-tab="sales">销售记录</button>
+            <button class="tab-btn" data-tab="customers">客户管理</button>
+            <button class="tab-btn" data-tab="stats">数据统计</button>
+        </nav>
+
+        <div class="tab-content" id="brands-tab">
+            <div class="section">
+                <h2><i class="fas fa-cigarette"></i> 品牌管理</h2>
+                <div class="form-container">
+                    <form id="brandForm">
+                        <input type="hidden" id="brandId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>品牌名称</label>
+                                <input type="text" id="brandName" required placeholder="如：中华">
+                            </div>
+                            <div class="form-group">
+                                <label>规格</label>
+                                <input type="text" id="brandSpec" required placeholder="如：软盒">
+                            </div>
+                            <div class="form-group">
+                                <label>类别</label>
+                                <select id="brandCategory">
+                                    <option value="高端">高端</option>
+                                    <option value="中端">中端</option>
+                                    <option value="低端">低端</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>入库价格（元/条）</label>
+                                <input type="number" id="purchasePrice" required min="0" step="0.01" placeholder="入库价">
+                            </div>
+                            <div class="form-group">
+                                <label>销售价格（元/条）</label>
+                                <input type="number" id="salePrice" required min="0" step="0.01" placeholder="销售价">
+                            </div>
+                            <div class="form-group">
+                                <label>库存数量（条）</label>
+                                <input type="number" id="stockQuantity" required min="0" step="1" placeholder="库存">
+                            </div>
+                            <div class="form-group">
+                                <label>预警库存</label>
+                                <input type="number" id="alertStock" required min="0" step="1" placeholder="预警数量" value="10">
+                            </div>
+                        </div>
+                        <button type="submit" id="brandSubmitBtn">添加品牌</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table id="brandTable">
+                        <thead>
+                            <tr>
+                                <th>品牌</th>
+                                <th>规格</th>
+                                <th>类别</th>
+                                <th>入库价</th>
+                                <th>销售价</th>
+                                <th>库存</th>
+                                <th>预警</th>
+                                <th>利润</th>
+                                <th>利润率</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="brandTableBody"></tbody>
+                    </table>
+                    <div id="brandEmpty" class="empty-state">暂无品牌，请添加</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="purchases-tab" style="display: none;">
+            <div class="section">
+                <h2><i class="fas fa-truck"></i> 进货录入</h2>
+                <div class="form-container">
+                    <form id="purchaseForm">
+                        <input type="hidden" id="purchaseId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>选择品牌</label>
+                                <select id="purchaseBrand" required>
+                                    <option value="">请选择品牌</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>选择供应商</label>
+                                <select id="purchaseSupplier" required>
+                                    <option value="">请选择供应商</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>进货数量（条）</label>
+                                <input type="number" id="purchaseQuantity" required min="1" step="1" placeholder="数量">
+                            </div>
+                            <div class="form-group">
+                                <label>进货单价（元/条）</label>
+                                <input type="number" id="purchasePrice" required min="0" step="0.01" placeholder="单价">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>进货日期</label>
+                                <input type="date" id="purchaseDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>备注</label>
+                                <input type="text" id="purchaseRemark" placeholder="备注信息">
+                            </div>
+                        </div>
+                        <div class="price-preview">
+                            <span>进货单价：<span id="purchasePreviewPrice">0</span> 元</span>
+                            <span>进货数量：<span id="purchasePreviewQty">0</span> 条</span>
+                            <span>进货总额：<span id="purchasePreviewTotal">0</span> 元</span>
+                        </div>
+                        <button type="submit" id="purchaseSubmitBtn">确认进货</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-list"></i> 进货记录</h2>
+                <div class="filter-bar">
+                    <input type="date" id="purchaseFilterDate" placeholder="选择日期">
+                    <select id="purchaseFilterBrand">
+                        <option value="">所有品牌</option>
+                    </select>
+                    <select id="purchaseFilterSupplier">
+                        <option value="">所有供应商</option>
+                    </select>
+                    <button id="purchaseFilterBtn">筛选</button>
+                    <button id="purchaseClearFilterBtn">清除</button>
+                </div>
+                <div class="table-container">
+                    <table id="purchasesTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>品牌</th>
+                                <th>规格</th>
+                                <th>供应商</th>
+                                <th>数量</th>
+                                <th>单价</th>
+                                <th>总额</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchasesTableBody"></tbody>
+                    </table>
+                    <div id="purchasesEmpty" class="empty-state">暂无进货记录</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="suppliers-tab" style="display: none;">
+            <div class="section">
+                <h2><i class="fas fa-building"></i> 供应商管理</h2>
+                <div class="form-container">
+                    <form id="supplierForm">
+                        <input type="hidden" id="supplierId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>供应商名称</label>
+                                <input type="text" id="supplierName" required placeholder="供应商名称">
+                            </div>
+                            <div class="form-group">
+                                <label>联系人</label>
+                                <input type="text" id="supplierContact" placeholder="联系人">
+                            </div>
+                            <div class="form-group">
+                                <label>联系电话</label>
+                                <input type="tel" id="supplierPhone" placeholder="联系电话">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>地址</label>
+                                <input type="text" id="supplierAddress" placeholder="地址">
+                            </div>
+                            <div class="form-group">
+                                <label>合作品牌</label>
+                                <input type="text" id="supplierBrands" placeholder="合作品牌，逗号分隔">
+                            </div>
+                            <div class="form-group">
+                                <label>信用等级</label>
+                                <select id="supplierCredit">
+                                    <option value="A">A - 优秀</option>
+                                    <option value="B">B - 良好</option>
+                                    <option value="C">C - 一般</option>
+                                    <option value="D">D - 较差</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" id="supplierSubmitBtn">添加供应商</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table id="supplierTable">
+                        <thead>
+                            <tr>
+                                <th>供应商名称</th>
+                                <th>联系人</th>
+                                <th>电话</th>
+                                <th>地址</th>
+                                <th>合作品牌</th>
+                                <th>信用等级</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplierTableBody"></tbody>
+                    </table>
+                    <div id="supplierEmpty" class="empty-state">暂无供应商</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="sales-tab" style="display: none;">
+            <div class="section">
+                <h2><i class="fas fa-shopping-cart"></i> 销售录入</h2>
+                <div class="form-container">
+                    <form id="saleForm">
+                        <input type="hidden" id="saleId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>选择品牌</label>
+                                <select id="saleBrand" required>
+                                    <option value="">请选择品牌</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>销售数量（条）</label>
+                                <input type="number" id="saleQuantity" required min="1" step="1" placeholder="数量">
+                            </div>
+                            <div class="form-group">
+                                <label>客户类型</label>
+                                <select id="saleCustomerType">
+                                    <option value="零售">零售</option>
+                                    <option value="批发">批发</option>
+                                    <option value="团购">团购</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>销售时段</label>
+                                <select id="saleTimeSlot">
+                                    <option value="上午">上午(6:00-12:00)</option>
+                                    <option value="下午">下午(12:00-18:00)</option>
+                                    <option value="晚上">晚上(18:00-24:00)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>销售日期</label>
+                                <input type="date" id="saleDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>备注</label>
+                                <input type="text" id="saleRemark" placeholder="备注信息">
+                            </div>
+                        </div>
+                        <div class="price-preview">
+                            <span>入库价：<span id="previewPurchase">0</span> 元</span>
+                            <span>销售价：<span id="previewSale">0</span> 元</span>
+                            <span>销售额：<span id="previewTotal">0</span> 元</span>
+                            <span>利润：<span id="previewProfit">0</span> 元</span>
+                        </div>
+                        <button type="submit" id="saleSubmitBtn">确认销售</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-list"></i> 销售记录</h2>
+                <div class="filter-bar">
+                    <input type="date" id="filterDate" placeholder="选择日期">
+                    <select id="filterBrand">
+                        <option value="">所有品牌</option>
+                    </select>
+                    <select id="filterCustomerType">
+                        <option value="">所有客户类型</option>
+                        <option value="零售">零售</option>
+                        <option value="批发">批发</option>
+                        <option value="团购">团购</option>
+                    </select>
+                    <button id="filterBtn">筛选</button>
+                    <button id="clearFilterBtn">清除</button>
+                </div>
+                <div class="table-container">
+                    <table id="salesTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>时段</th>
+                                <th>品牌</th>
+                                <th>规格</th>
+                                <th>数量</th>
+                                <th>入库价</th>
+                                <th>销售价</th>
+                                <th>销售额</th>
+                                <th>利润</th>
+                                <th>客户类型</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody"></tbody>
+                    </table>
+                    <div id="salesEmpty" class="empty-state">暂无销售记录</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="customers-tab" style="display: none;">
+            <div class="section">
+                <h2><i class="fas fa-users"></i> 客户管理</h2>
+                <div class="form-container">
+                    <form id="customerForm">
+                        <input type="hidden" id="customerId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>客户名称</label>
+                                <input type="text" id="customerName" required placeholder="客户名称">
+                            </div>
+                            <div class="form-group">
+                                <label>客户类型</label>
+                                <select id="customerType">
+                                    <option value="个人">个人</option>
+                                    <option value="商户">商户</option>
+                                    <option value="企业">企业</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>联系电话</label>
+                                <input type="tel" id="customerPhone" placeholder="联系电话">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>地址</label>
+                                <input type="text" id="customerAddress" placeholder="地址">
+                            </div>
+                            <div class="form-group">
+                                <label>累计消费金额</label>
+                                <input type="number" id="customerTotalSpent" min="0" step="0.01" placeholder="0" readonly>
+                            </div>
+                        </div>
+                        <button type="submit" id="customerSubmitBtn">添加客户</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table id="customerTable">
+                        <thead>
+                            <tr>
+                                <th>客户名称</th>
+                                <th>类型</th>
+                                <th>电话</th>
+                                <th>地址</th>
+                                <th>累计消费</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody"></tbody>
+                    </table>
+                    <div id="customerEmpty" class="empty-state">暂无客户</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="stats-tab" style="display: none;">
+            <div class="stats-filter-bar">
+                <div class="filter-section">
+                    <label>日期范围：</label>
+                    <input type="date" id="statsStartDate">
+                    <span class="filter-separator">至</span>
+                    <input type="date" id="statsEndDate">
+                </div>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="week">周视图</button>
+                    <button class="view-btn" data-view="month">月视图</button>
+                    <button class="view-btn" data-view="year">年视图</button>
+                </div>
+                <button id="statsRefreshBtn">刷新数据</button>
+            </div>
+
+            <div class="dashboard">
+                <div class="stat-card">
+                    <div class="stat-icon sales-icon"><i class="fas fa-money-bill"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">今日销售额</div>
+                        <div class="stat-value" id="todaySales">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon quantity-icon"><i class="fas fa-box"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">今日销量</div>
+                        <div class="stat-value" id="todayQuantity">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon profit-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">今日利润</div>
+                        <div class="stat-value" id="todayProfit">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon rate-icon"><i class="fas fa-percent"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">今日利润率</div>
+                        <div class="stat-value" id="todayRate">0%</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon month-icon"><i class="fas fa-calendar-month"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">本月销售额</div>
+                        <div class="stat-value" id="monthSales">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon growth-icon"><i class="fas fa-arrow-up-right"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">月环比增长</div>
+                        <div class="stat-value" id="monthGrowth">0%</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon avg-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">客单价</div>
+                        <div class="stat-value" id="avgOrderValue">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon turnover-icon"><i class="fas fa-refresh"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">库存周转率</div>
+                        <div class="stat-value" id="stockTurnover">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purchase-icon"><i class="fas fa-truck"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">本月进货额</div>
+                        <div class="stat-value" id="monthPurchases">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon supplier-icon"><i class="fas fa-building"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">合作供应商</div>
+                        <div class="stat-value" id="supplierCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon customer-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">活跃客户数</div>
+                        <div class="stat-value" id="activeCustomerCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon order-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-label">订单完成率</div>
+                        <div class="stat-value" id="orderCompletionRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-chart-bar"></i> 利润分析</h2>
+                <div class="profit-analysis">
+                    <div class="profit-item">
+                        <span>总销售额</span>
+                        <span id="totalSales">0 元</span>
+                    </div>
+                    <div class="profit-item">
+                        <span>总成本（入库价）</span>
+                        <span id="totalCost">0 元</span>
+                    </div>
+                    <div class="profit-item highlight">
+                        <span>总利润</span>
+                        <span id="totalProfit">0 元</span>
+                    </div>
+                    <div class="profit-item">
+                        <span>毛利率</span>
+                        <span id="grossRate">0%</span>
+                    </div>
+                    <div class="profit-item">
+                        <span>销售笔数</span>
+                        <span id="totalOrders">0 笔</span>
+                    </div>
+                    <div class="profit-item">
+                        <span>平均利润</span>
+                        <span id="avgProfit">0 元</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-row">
+                <div class="section half">
+                    <h2><i class="fas fa-trophy"></i> 品牌销售排名</h2>
+                    <div class="table-container">
+                        <table id="brandRankTable">
+                            <thead>
+                                <tr>
+                                    <th>排名</th>
+                                    <th>品牌</th>
+                                    <th>销售数量</th>
+                                    <th>销售金额</th>
+                                    <th>利润贡献</th>
+                                    <th>占比</th>
+                                </tr>
+                            </thead>
+                            <tbody id="brandRankBody"></tbody>
+                        </table>
+                        <div id="rankEmpty" class="empty-state">暂无销售数据</div>
+                    </div>
+                </div>
+                <div class="section half">
+                    <h2><i class="fas fa-pie-chart"></i> 类别销售占比</h2>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-calendar"></i> 日期销售趋势</h2>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-trending-up"></i> 利润趋势分析</h2>
+                <div class="chart-container">
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section-row">
+                <div class="section half">
+                    <h2><i class="fas fa-clock"></i> 时段销售分析</h2>
+                    <div class="chart-container">
+                        <canvas id="timeSlotChart"></canvas>
+                    </div>
+                </div>
+                <div class="section half">
+                    <h2><i class="fas fa-users"></i> 客户类型分析</h2>
+                    <div class="chart-container">
+                        <canvas id="customerTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-row">
+                <div class="section half">
+                    <h2><i class="fas fa-trophy"></i> 客户销售排行</h2>
+                    <div class="table-container">
+                        <table id="customerRankTable">
+                            <thead>
+                                <tr>
+                                    <th>排名</th>
+                                    <th>客户名称</th>
+                                    <th>客户类型</th>
+                                    <th>累计消费</th>
+                                    <th>消费笔数</th>
+                                    <th>平均消费</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerRankBody"></tbody>
+                        </table>
+                        <div id="customerRankEmpty" class="empty-state">暂无客户消费数据</div>
+                    </div>
+                </div>
+                <div class="section half">
+                    <h2><i class="fas fa-building"></i> 供应商供货分析</h2>
+                    <div class="chart-container">
+                        <canvas id="supplierChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-warehouse"></i> 库存统计</h2>
+                <div class="table-container">
+                    <table id="stockTable">
+                        <thead>
+                            <tr>
+                                <th>品牌</th>
+                                <th>规格</th>
+                                <th>类别</th>
+                                <th>库存数量</th>
+                                <th>预警值</th>
+                                <th>库存金额</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody"></tbody>
+                    </table>
+                    <div id="stockEmpty" class="empty-state">暂无库存数据</div>
+                </div>
+                <div class="stock-summary">
+                    <span>库存总量：<span id="totalStock">0</span> 条</span>
+                    <span>库存总金额：<span id="totalStockValue">0</span> 元</span>
+                    <span>库存预警：<span id="stockAlertCount">0</span> 种</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-file-alt"></i> 销售日报</h2>
+                <div class="report-container">
+                    <div class="report-header">
+                        <h3>今日销售汇总</h3>
+                        <span id="reportDate"></span>
+                    </div>
+                    <div class="report-content">
+                        <div class="report-row">
+                            <div class="report-item">
+                                <span>销售笔数</span>
+                                <span id="reportOrders">0 笔</span>
+                            </div>
+                            <div class="report-item">
+                                <span>销售条数</span>
+                                <span id="reportQuantity">0 条</span>
+                            </div>
+                            <div class="report-item">
+                                <span>销售金额</span>
+                                <span id="reportAmount">0 元</span>
+                            </div>
+                            <div class="report-item">
+                                <span>销售利润</span>
+                                <span id="reportProfit">0 元</span>
+                            </div>
+                        </div>
+                        <div class="report-row">
+                            <div class="report-item">
+                                <span>高端烟销售</span>
+                                <span id="reportHighEnd">0 条</span>
+                            </div>
+                            <div class="report-item">
+                                <span>中端烟销售</span>
+                                <span id="reportMidEnd">0 条</span>
+                            </div>
+                            <div class="report-item">
+                                <span>低端烟销售</span>
+                                <span id="reportLowEnd">0 条</span>
+                            </div>
+                            <div class="report-item">
+                                <span>利润率</span>
+                                <span id="reportRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-download"></i> 数据管理</h2>
+                <div class="data-management">
+                    <button id="exportBtn">导出所有数据 (JSON)</button>
+                    <button id="importBtn">导入数据</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button id="clearDataBtn">清空所有数据</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
