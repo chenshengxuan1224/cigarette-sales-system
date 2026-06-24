@@ -205,6 +205,21 @@ function updateFilterBrandSelect() {
     select.value = currentValue;
 }
 
+function updateSaleCustomerSelect() {
+    const select = document.getElementById('saleCustomer');
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">请选择客户</option>';
+    
+    customers.forEach(customer => {
+        const option = document.createElement('option');
+        option.value = customer.id;
+        option.textContent = `${customer.name} (${customer.type})`;
+        select.appendChild(option);
+    });
+    
+    select.value = currentValue;
+}
+
 function initSaleForm() {
     const form = document.getElementById('saleForm');
     const brandSelect = document.getElementById('saleBrand');
@@ -221,6 +236,7 @@ function initSaleForm() {
         const brandId = parseInt(brandSelect.value);
         const quantity = parseInt(quantityInput.value);
         const customerType = document.getElementById('saleCustomerType').value;
+        const customerId = document.getElementById('saleCustomer').value ? parseInt(document.getElementById('saleCustomer').value) : null;
         const timeSlot = document.getElementById('saleTimeSlot').value;
         const date = dateInput.value;
         const remark = document.getElementById('saleRemark').value;
@@ -239,6 +255,7 @@ function initSaleForm() {
             salePrice: brand.salePrice,
             purchasePrice: brand.purchasePrice,
             customerType,
+            customerId,
             timeSlot,
             date,
             remark,
@@ -302,8 +319,10 @@ function renderSales(filterDate = null, filterBrand = null, filterCustomerType =
 
     filteredSales.sort((a, b) => b.timestamp - a.timestamp).forEach(sale => {
         const brand = getBrandById(sale.brandId);
+        const customer = customers.find(c => c.id === sale.customerId);
         const brandName = brand ? `${brand.name}` : '未知品牌';
         const brandSpec = brand ? `${brand.spec}` : '';
+        const customerName = customer ? customer.name : '-';
         const total = sale.salePrice * sale.quantity;
         const profit = (sale.salePrice - sale.purchasePrice) * sale.quantity;
 
@@ -319,6 +338,7 @@ function renderSales(filterDate = null, filterBrand = null, filterCustomerType =
             <td>${formatMoney(total)}</td>
             <td>${formatMoney(profit)}</td>
             <td>${sale.customerType}</td>
+            <td>${customerName}</td>
             <td>
                 <button class="btn-delete" onclick="deleteSale(${sale.id})">删除</button>
             </td>
@@ -726,6 +746,7 @@ function initCustomerForm() {
 
         saveData();
         renderCustomers();
+        updateSaleCustomerSelect();
         form.reset();
         document.getElementById('customerId').value = '';
         document.getElementById('customerSubmitBtn').textContent = '添加客户';
@@ -779,6 +800,7 @@ function deleteCustomer(id) {
         customers = customers.filter(c => c.id !== id);
         saveData();
         renderCustomers();
+        updateSaleCustomerSelect();
     }
 }
 
@@ -1864,6 +1886,7 @@ function init() {
     updatePurchaseFilterBrandSelect();
     updatePurchaseSupplierSelect();
     updatePurchaseFilterSupplierSelect();
+    updateSaleCustomerSelect();
     updateAllStats();
 }
 
