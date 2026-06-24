@@ -1381,7 +1381,7 @@ function updateProfitChart() {
         return;
     }
 
-    const padding = { top: 35, right: 20, bottom: 45, left: 60 };
+    const padding = { top: 50, right: 20, bottom: 55, left: 70 };
     const chartWidth = rect.width - padding.left - padding.right;
     const chartHeight = rect.height - padding.top - padding.bottom;
     const maxValue = Math.max(...amounts, ...profits) * 1.2 || 100;
@@ -1489,29 +1489,34 @@ function updateProfitChart() {
 
     sortedDates.forEach((date, index) => {
         const x = padding.left + (chartWidth / (sortedDates.length - 1)) * index;
-        ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillStyle = '#64748b';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         const dateObj = new Date(date);
-        ctx.fillText(`${dateObj.getMonth() + 1}/${dateObj.getDate()}`, x, padding.top + chartHeight + 10);
+        if (sortedDates.length <= 7 || index % 2 === 0) {
+            ctx.fillText(`${dateObj.getMonth() + 1}/${dateObj.getDate()}`, x, padding.top + chartHeight + 8);
+        }
     });
 
     ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
     
+    const legendX = padding.left + 10;
+    const legendY = 18;
+    
     ctx.fillStyle = '#4f8cff';
     ctx.beginPath();
-    ctx.roundRect(rect.width - 150, 15, 12, 12, 3);
+    ctx.roundRect(legendX, legendY, 12, 12, 3);
     ctx.fill();
     ctx.fillStyle = '#64748b';
-    ctx.fillText('销售额', rect.width - 135, 21);
+    ctx.fillText('销售额', legendX + 18, legendY + 8);
 
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
-    ctx.roundRect(rect.width - 150, 38, 12, 12, 3);
+    ctx.roundRect(legendX + 80, legendY, 12, 12, 3);
     ctx.fill();
     ctx.fillStyle = '#64748b';
-    ctx.fillText('利润', rect.width - 135, 38);
+    ctx.fillText('利润', legendX + 98, legendY + 8);
 }
 
 function updateCustomerRank() {

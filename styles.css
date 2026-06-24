@@ -530,7 +530,12 @@ table tbody tr:hover {
     height: 250px;
 }
 
+.chart-container.tall {
+    height: 350px;
+}
+
 #salesChart,
+#profitChart,
 #categoryChart,
 #timeSlotChart,
 #customerTypeChart {
