@@ -997,7 +997,7 @@ function updateSalesChart() {
         return;
     }
 
-    const padding = { top: 35, right: 20, bottom: 45, left: 60 };
+    const padding = { top: 50, right: 20, bottom: 65, left: 75 };
     const chartWidth = rect.width - padding.left - padding.right;
     const chartHeight = rect.height - padding.top - padding.bottom;
     const maxAmount = Math.max(...amounts) * 1.2 || 100;
@@ -1071,50 +1071,61 @@ function updateSalesChart() {
         ctx.roundRect(x, padding.top + chartHeight - height, barWidth, Math.min(height, 20), [6, 6, 0, 0]);
         ctx.fill();
 
-        ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillStyle = '#1e3a5f';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        if (height > 30) {
-            ctx.fillText(formatMoney(amounts[index]), x + barWidth / 2, padding.top + chartHeight - height - 8);
+        if (height > 35) {
+            ctx.fillText(formatMoney(amounts[index]), x + barWidth / 2, padding.top + chartHeight - height - 6);
+        } else if (height > 0) {
+            ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#4f8cff';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(formatMoney(amounts[index]), x + barWidth / 2, padding.top + chartHeight - height / 2);
         }
 
-        ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillStyle = '#64748b';
         ctx.textBaseline = 'top';
         const dateObj = new Date(date);
         const displayDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
         const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
         const weekDay = weekDays[dateObj.getDay()];
-        ctx.fillText(displayDate, x + barWidth / 2, padding.top + chartHeight + 10);
-        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(displayDate, x + barWidth / 2, padding.top + chartHeight + 8);
+        ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillStyle = '#94a3b8';
-        ctx.fillText(weekDay, x + barWidth / 2, padding.top + chartHeight + 25);
+        ctx.fillText(weekDay, x + barWidth / 2, padding.top + chartHeight + 22);
 
-        ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.fillStyle = '#22c55e';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText(`${quantities[index]}条`, x + barWidth / 2, padding.top + chartHeight - height - 20);
+        if (height > 50) {
+            ctx.fillText(`${quantities[index]}条`, x + barWidth / 2, padding.top + chartHeight - height - 16);
+        }
     });
 
-    ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     
+    const legendX = padding.left + 10;
+    const legendY = 18;
+    
     ctx.fillStyle = '#4f8cff';
     ctx.beginPath();
-    ctx.roundRect(rect.width - 150, 15, 12, 12, 3);
+    ctx.roundRect(legendX, legendY, 12, 12, 3);
     ctx.fill();
     ctx.fillStyle = '#64748b';
-    ctx.fillText('销售额', rect.width - 135, 21);
+    ctx.fillText('销售额', legendX + 18, legendY + 8);
 
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
-    ctx.arc(rect.width - 150, 38, 4, 0, Math.PI * 2);
+    ctx.arc(legendX + 80, legendY + 6, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#64748b';
-    ctx.fillText('销售数量', rect.width - 135, 38);
+    ctx.fillText('销售数量', legendX + 90, legendY + 8);
 }
 
 function updateCategoryChart() {
