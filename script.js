@@ -373,7 +373,18 @@ function initPurchaseForm() {
 
     dateInput.value = getTodayDate();
 
-    brandSelect.addEventListener('change', updatePurchasePreview);
+    brandSelect.addEventListener('change', () => {
+        const brand = getBrandById(brandSelect.value);
+        const basePriceSpan = document.getElementById('brandBasePrice');
+        if (brand) {
+            priceInput.value = brand.purchasePrice;
+            basePriceSpan.textContent = `（基准入库价：${formatMoney(brand.purchasePrice)}）`;
+        } else {
+            priceInput.value = '';
+            basePriceSpan.textContent = '';
+        }
+        updatePurchasePreview();
+    });
     supplierSelect.addEventListener('change', updatePurchasePreview);
     quantityInput.addEventListener('input', updatePurchasePreview);
     priceInput.addEventListener('input', updatePurchasePreview);
@@ -402,7 +413,6 @@ function initPurchaseForm() {
         });
 
         brand.stock += quantity;
-        brand.purchasePrice = price;
 
         saveData();
         renderPurchases();
